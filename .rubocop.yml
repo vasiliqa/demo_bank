@@ -1,0 +1,61 @@
+AllCops:
+  UseCache: false
+  TargetRubyVersion: 2.5
+
+Layout/ClassStructure:
+  Enabled: true
+
+Layout/MultilineAssignmentLayout:
+  Enabled: true
+  EnforcedStyle: same_line
+
+Layout/SpaceInsideStringInterpolation:
+  EnforcedStyle: space
+
+Metrics/AbcSize:
+  Max: 17
+
+Metrics/BlockLength:
+  Enabled: false
+
+Metrics/ClassLength:
+  Enabled: false
+
+Metrics/LineLength:
+  Max: 100
+
+Metrics/MethodLength:
+  Enabled: false
+
+Style/AndOr:
+  EnforcedStyle: conditionals
+
+Style/Documentation:
+  Enabled: false
+
+Style/EmptyMethod:
+  EnforcedStyle: expanded
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Style/Lambda:
+  EnforcedStyle: literal
+
+Style/NumericPredicate:
+  Enabled: false
+
+Style/PercentLiteralDelimiters:
+  PreferredDelimiters:
+    "%i": "()"
+    "%w": "()"
+
+Style/RegexpLiteral:
+  EnforcedStyle: percent_r
+
+Style/ReturnNil:
+  Enabled: true
+
+Style/SymbolArray:
+  MinSize: 5
+
