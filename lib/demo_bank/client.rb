@@ -1,18 +1,15 @@
 module DemoBank
   class Client
-    attr_accessor :cookie, :connection
+    attr_accessor :connection
     BANK_URL = 'https://verify-demo-bank.herokuapp.com'.freeze
 
     def initialize
       @connection = Faraday.new(url: BANK_URL) do |faraday|
         faraday.request :url_encoded
         faraday.use :cookie_jar
-        faraday.options[:timeout] = 20
         faraday.use Faraday::Response::RaiseError
         faraday.adapter Faraday.default_adapter
       end
-
-      @cookie = ''
     end
 
     # By requirements the method should  return the Boolean. I think that it is a bad idea -
@@ -20,28 +17,22 @@ module DemoBank
     # so it returns a true/false value or raises an error
     def login(email, password)
       token = fetch_token(connection.get('/login').body)
-      response = connection.post(
-        '/login', email: email, password: password, authenticity_token: token
-      )
 
-      clear_cookie and return false if redirect_to_login?(response)
+      response = connection.post do |request|
+        request.url '/login'
+        request.body = { email: email, password: password, authenticity_token: token }
+        request.options[:timeout] = 20
+      end
 
-      add_cookie(response.headers)
-      true
+      !redirect_to_login?(response)
     rescue Faraday::Error => e
       raise DemoBank::Error, e.message
     end
 
     def accounts
-      raise DemoBank::Error, 'You should login first' if cookie.empty?
+      response = connection.get('/accounts')
 
-      response = connection.get do |request|
-        request.url '/accounts'
-        request.headers['Cookie'] = cookie
-        request.options[:timeout] = 30
-      end
-
-      clear_cookie and raise DemoBank::Error, 'Invalid credentials' if redirect_to_login?(response)
+      raise DemoBank::Error, 'Invalid credentials' if redirect_to_login?(response)
 
       parse_accounts(response.body)
     rescue Faraday::Error => e
@@ -68,14 +59,6 @@ module DemoBank
         result << { type: type, balance: balance, currency: currency }
       end
       result
-    end
-
-    def clear_cookie
-      self.cookie = ''
-    end
-
-    def add_cookie(headers)
-      self.cookie = headers['set-cookie'].strip.split(';')[0]
     end
 
     def redirect_to_login?(response)
